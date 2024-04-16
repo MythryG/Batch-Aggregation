@@ -4,10 +4,10 @@ from pyspark.sql import functions as F
 import sys
 
 def main(input_file, output_dir, time_bucket_duration):
-    # Initialize Spark session
+    # Initializing the Spark session
     spark = SparkSession.builder.appName("BatchAggregationCode").getOrCreate()
 
-    # Read input data
+    # Reading the input data
     try:
         input_data = spark.read.csv(input_file, header=True, inferSchema=True)
     except Exception as e:
@@ -15,7 +15,7 @@ def main(input_file, output_dir, time_bucket_duration):
         spark.stop()
         sys.exit(1)
 
-    # Aggregate data
+    # Aggregating the data
     try:
         aggregated_data = input_data.groupBy("metric",window("timestamp", time_bucket_duration)
         ).agg(avg("value").alias("average_value"),min("value").alias("minimum_value"),max("value").alias("maximum_value"))
@@ -24,14 +24,14 @@ def main(input_file, output_dir, time_bucket_duration):
         spark.stop()
         sys.exit(1)
 
-    # Write output data
+    # Writing the output data
     try:
         final_aggregated_data=aggregated_data.withColumn('time_bucket', F.to_json('window')).drop("window")
         aggregated_data.write.csv(output_dir, header=True)
     except Exception as e:
         print(f"Error writing output data: {e}")
     
-    # Stop Spark session
+    # Stoping the Spark session
     spark.stop()
 
 if __name__ == "__main__":
