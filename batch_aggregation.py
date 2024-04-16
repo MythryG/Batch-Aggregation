@@ -1,5 +1,6 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import window, avg
+from pyspark.sql import functions as F
 import sys
 
 def main(input_file, output_dir):
@@ -15,7 +16,7 @@ def main(input_file, output_dir):
         sys.exit(1)
 
     # Defining the time bucket duration
-    time_bucket_duration = "1 day"
+    time_bucket_duration = "1 hour"
 
     # Aggregating the data
     try:
@@ -29,8 +30,12 @@ def main(input_file, output_dir):
         sys.exit(1)
 
     # Writing the output data
-    try:
-        aggregated_data.write.csv(output_dir, header=True)
+   
+    try: 
+        print("success")
+        final_aggregated_data=aggregated_data.withColumn('time_bucket', F.to_json('window')).drop("window")
+        final_aggregated_data.write.option("header", "true").csv(output_dir , mode="overwrite")
+        final_aggregated_data.printSchema()
     except Exception as e:
         print(f"Error writing output data: {e}")
     
