@@ -27,7 +27,7 @@ def main(input_file, output_dir, time_bucket_duration):
     # Writing the output data
     try:
         final_aggregated_data=aggregated_data.withColumn('time_bucket', F.to_json('window')).drop("window")
-        aggregated_data.write.csv(output_dir, header=True)
+        final_aggregated_data.write.option("header", "true").csv(output_dir , mode="overwrite")
     except Exception as e:
         print(f"Error writing output data: {e}")
     
